@@ -12,11 +12,11 @@ const normalizePort = val => {
   }
   return false;
 };
-// NormalizePort = Utilisation du port 4000 par défaut
+
 const port = normalizePort(process.env.PORT || '4000');
 app.set('port', port);
 
-// errorHandler = recherche les erreurs et les gère de manière appropriée
+
 const errorHandler = error => {
   if (error.syscall !== 'listen') {
     throw error;

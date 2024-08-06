@@ -1,34 +1,41 @@
 const Book = require('../models/book');
 const fs = require('fs');
 
-exports.addRating =  (req, res, next) => {
-    const { userId, grade } = req.body;
+exports.addRating = (req, res, next) => {
+    const { userId, rating } = req.body;
+    const bookId = req.params.id;
 
-    Book.findOne({ _id: req.params.id })
-        .then(book => {
-            if (!book) {
-                return res.status(404).json({ message: 'Livre non trouvé!' });
-            }
+    if (!bookId || bookId === 'undefined') {
+        return res.status(400).json({ error: 'Invalid book ID' });
+    }
 
-            const existingRatingIndex = book.ratings.findIndex(rating => rating.userId === userId);
+    Book.findOne({ _id: bookId })
+    .then(book => {
+        if (!book) {
+            return res.status(404).json({ message: 'Livre non trouvé!' });
+        }
 
-            if (existingRatingIndex >= 0) {
-                book.ratings[existingRatingIndex].grade = grade;
-            } else {
-                book.ratings.push({ userId, grade });
-            }
+        const existingRatingIndex = book.ratings.findIndex(rating => rating.userId === userId);
 
-            const totalRatings = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);
-            book.averageRating = totalRatings / book.ratings.length;
+        if (existingRatingIndex >= 0) {
+            book.ratings[existingRatingIndex].grade = rating;
+        } else {
+            book.ratings.push({ userId, grade: rating });
+        }
 
-            book.save()
-                .then(() => res.status(200).json({ message: 'Évaluation ajoutée/mise à jour avec succès!' }))
-                .catch(error => res.status(400).json({ error }));
+        const totalRatings = book.ratings.reduce((acc, rating) => acc + rating.grade, 0);
+        book.averageRating = totalRatings / book.ratings.length;
 
-        })
-        .catch(error => res.status(500).json({ error }));
+        book.save()
+            .then(savedBook => {
+                res.status(200).json({ message: 'Évaluation ajoutée/mise à jour avec succès!', id: savedBook._id });
+            })
+            .catch(error => res.status(400).json({ error }));
+
+    })
+    .catch(error => res.status(500).json({ error }));
 };
-  
+
 exports.addBook = (req, res, next) => {
     console.log(req.body)
     const bookObject = JSON.parse(req.body.book);

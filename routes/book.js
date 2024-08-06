@@ -3,11 +3,12 @@ const router = express.Router();
 
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
+const sharp = require('../middleware/sharp-config')
 
 const bookCtrl = require('../controllers/book');
 
 router.post('/:id/rating', auth, bookCtrl.addRating);
-router.post('/', auth, multer, bookCtrl.addBook);
+router.post('/', auth, multer, sharp, bookCtrl.addBook);
 router.get('/', bookCtrl.showBooks);
 router.get('/bestrating', bookCtrl.showBestBook);
 router.get('/:id', bookCtrl.showSingleBook);
